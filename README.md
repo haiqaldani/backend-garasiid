@@ -1,6 +1,7 @@
 # Backend GarasiID
 
 A Node.js REST API for image management with MySQL database.
+This is for test Fullstack Developer for GarasiID
 
 ## Prerequisites
 
