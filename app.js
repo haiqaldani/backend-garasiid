@@ -1,43 +1,42 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+require('dotenv').config();
+const express = require('express');
+const path = require('path');
+const pool = require('./config/db');
+const app = express();
 
-var indexRouter = require('./routes/index');
-var imagesRouter = require('./routes/images')
-
-var app = express();
-const URL = `/api`
-
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
-app.use(logger('dev'));
+// Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/', indexRouter);
-app.use(`${URL}/images`, imagesRouter)
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, process.env.UPLOAD_PATH)));
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+// Routes
+app.use('/api/images', require('./routes/images'));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'Something went wrong!',
+        error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+// Test MySQL connection
+pool.getConnection()
+    .then(connection => {
+        console.log('Connected to MySQL database');
+        connection.release();
+    })
+    .catch(err => {
+        console.error('MySQL connection error:', err);
+    });
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+const PORT = process.env.PORT || 5002;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT} in ${process.env.NODE_ENV} mode`);
 });
 
 module.exports = app;
