@@ -17,7 +17,7 @@ const createImage = async (req, res) => {
 
         for (let i = 0; i < req.files.length; i++) {
             const uploadedFile = req.files[i];
-            const title = req.body.titles?.[i];
+            const title = Array.isArray(req.body.titles) ? req.body.titles[i] : req.body.titles;
 
             try {
                 Image.validateFile(uploadedFile);

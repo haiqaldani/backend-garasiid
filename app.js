@@ -1,15 +1,29 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 const pool = require('./config/db');
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
+
+// Or, for more specific CORS configuration:
+/*
+app.use(cors({
+    origin: ['http://localhost:3000', 'https://yourdomain.com'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+*/
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from public directory
-app.use(express.static(path.join(__dirname, process.env.UPLOAD_PATH)));
+// Static file serving
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 // Routes
 app.use('/api/images', require('./routes/images'));

@@ -10,9 +10,9 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, '../public/images'));
   },
   filename: function (req, file, cb) {
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    // Keep original filename with timestamp
+    const uniqueFilename = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueFilename);
   }
 });
 
@@ -35,7 +35,8 @@ const upload = multer({
 
 // Import controllers
 const { 
-    getImages, 
+    getImages,
+    getImageById, 
     createImage, 
     updateImage, 
     deleteImage 
@@ -43,7 +44,8 @@ const {
 
 // Routes
 router.get('/', getImages);
-router.post('/upload', upload.array('files', 10), createImage);  // Changed to 'files' and added limit
+router.get('/:id', getImageById);  // New route for getting single image
+router.post('/upload', upload.array('files', 10), createImage);
 router.put('/:id', updateImage);
 router.delete('/:id', deleteImage);
 
